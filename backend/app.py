@@ -6,34 +6,35 @@ import os
 app = Flask(__name__)
 CORS(app)
 
+# Получаем DATABASE_URL из Railway
 database_url = os.getenv("DATABASE_URL")
 
-if database_url and database_url.startswith("postgres://"):
+# Railway иногда дает postgres:// вместо postgresql://
+if database_url:
     database_url = database_url.replace("postgres://", "postgresql://", 1)
 
-app.config["SQLALCHEMY_DATABASE_URI"] = database_url or "sqlite:///local.db"
+# Подключение PostgreSQL
+app.config["SQLALCHEMY_DATABASE_URI"] = database_url
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
 
+# Модель таблицы
 class AppItem(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     platform = db.Column(db.String(100), nullable=False)
     download_link = db.Column(db.String(300), nullable=False)
 
+# Создание таблиц
 with app.app_context():
     db.create_all()
 
-@app.route("/")
-def home():
-    return {
-        "student_name": "Ulan Abdykerimov",
-        "student_id": "YOUR_ID",
-        "message": "Super App Download API"
-    }
+# ---------------- ENDPOINT 1 ----------------
+# GET all items
 
-@app.route("/api/data", methods=["GET"])
+@app.route("/api/items", methods=["GET"])
 def get_items():
+
     items = AppItem.query.all()
 
     result = []
@@ -45,11 +46,26 @@ def get_items():
             "download_link": item.download_link
         })
 
-    return jsonify(result)
+    return jsonify(result), 200
 
-@app.route("/api/data", methods=["POST"])
+
+# ---------------- ENDPOINT 2 ----------------
+# POST new item
+
+@app.route("/api/items", methods=["POST"])
 def add_item():
-    data = request.json
+
+    data = request.get_json()
+
+    if not data:
+        return jsonify({
+            "error": "No JSON data provided"
+        }), 400
+
+    if "platform" not in data or "download_link" not in data:
+        return jsonify({
+            "error": "platform and download_link are required"
+        }), 400
 
     new_item = AppItem(
         platform=data["platform"],
@@ -63,8 +79,13 @@ def add_item():
         "message": "Item added successfully"
     }), 201
 
-@app.route("/api/data/<int:item_id>", methods=["DELETE"])
+
+# ---------------- ENDPOINT 3 ----------------
+# DELETE item
+
+@app.route("/api/items/<int:item_id>", methods=["DELETE"])
 def delete_item(item_id):
+
     item = AppItem.query.get(item_id)
 
     if not item:
@@ -77,8 +98,15 @@ def delete_item(item_id):
 
     return jsonify({
         "message": "Item deleted successfully"
-    })
+    }), 200
 
+
+# Railway PORT
 if __name__ == "__main__":
+
     port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+
+    app.run(
+        host="0.0.0.0",
+        port=port
+    )
