@@ -12,4 +12,5 @@ Fullstack application with:
 ## Student Information
 
 Name: Ulan Abdykerimov  
-ID: YOUR_ID
+Group: Comsep-23
+Student ID: 220104083
