@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import "./style.css";
 
 function App() {
   const [items, setItems] = useState([]);
@@ -19,8 +18,6 @@ function App() {
   }, []);
 
   const addItem = async () => {
-    if (!platform || !downloadLink) return;
-
     await fetch(API_URL, {
       method: "POST",
       headers: {
@@ -47,62 +44,47 @@ function App() {
   };
 
   return (
-    <div className="container">
-      <h1>Best app in your life</h1>
+    <div style={{ padding: "30px", fontFamily: "Arial" }}>
+      <h1>Super App Downloads</h1>
 
-      <p className="subtitle">
-        Download and use super-app in all platforms
-      </p>
+      <h3>Student: Ulan Abdykerimov</h3>
+      <h3>ID: YOUR_ID</h3>
 
-      <div className="form">
-        <input
-          type="text"
-          placeholder="Platform"
-          value={platform}
-          onChange={(e) => setPlatform(e.target.value)}
-        />
+      <input
+        type="text"
+        placeholder="Platform"
+        value={platform}
+        onChange={(e) => setPlatform(e.target.value)}
+      />
 
-        <input
-          type="text"
-          placeholder="Download Link"
-          value={downloadLink}
-          onChange={(e) => setDownloadLink(e.target.value)}
-        />
+      <input
+        type="text"
+        placeholder="Download Link"
+        value={downloadLink}
+        onChange={(e) => setDownloadLink(e.target.value)}
+      />
 
-        <button className="btn" onClick={addItem}>
-          Add Platform
-        </button>
-      </div>
+      <button onClick={addItem}>Add</button>
 
-      <div className="cards">
-        {items.map((item) => (
-          <div className="card" key={item.id}>
-            <h2>{item.platform}</h2>
+      <hr />
 
-            <p>Download application for {item.platform}</p>
+      {items.map((item) => (
+        <div key={item.id}>
+          <h3>{item.platform}</h3>
 
-            <a
-              href={item.download_link}
-              target="_blank"
-              rel="noreferrer"
-              className="btn"
-            >
-              Download
-            </a>
+          <a href={item.download_link}>
+            {item.download_link}
+          </a>
 
-            <button
-              className="delete-btn"
-              onClick={() => deleteItem(item.id)}
-            >
-              Delete
-            </button>
-          </div>
-        ))}
-      </div>
+          <br />
 
-      <footer>
-        © 2025 SuperApp of Amantur and Ulan
-      </footer>
+          <button onClick={() => deleteItem(item.id)}>
+            Delete
+          </button>
+
+          <hr />
+        </div>
+      ))}
     </div>
   );
 }
