@@ -1,0 +1,39 @@
+version: '3.8' 
+services: 
+  # База данных PostgreSQL 
+  postgres: 
+    image: postgres:15 
+    environment: 
+      POSTGRES_DB: mydb 
+      POSTGRES_PASSWORD: mypassword 
+    volumes: 
+      - postgres_data:/var/lib/postgresql/data 
+ 
+  # Backend API 
+  backend: 
+    build: ./backend 
+    environment: 
+      DATABASE_URL: postgresql://postgres:mypassword@postgres/mydb 
+    depends_on: 
+      - postgres 
+ 
+  # Frontend 
+  frontend: 
+    build: ./frontend 
+    environment: 
+      VITE_API_URL: http://YOUR_SERVER_IP/api 
+ 
+  # Nginx reverse proxy 
+  nginx: 
+    image: nginx:alpine 
+    ports: 
+      - '80:80' 
+    volumes: 
+      - ./nginx.conf:/etc/nginx/nginx.conf 
+    depends_on: 
+      - frontend 
+      - backend 
+ 
+# Volumes для сохранения данных БД 
+volumes: 
+  postgres_data:
